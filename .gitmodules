@@ -1,0 +1,6 @@
+[submodule "PluginCommon"]
+	path = PluginCommon
+	url = https://github.com/Lotlab/PluginCommon
+[submodule "machina"]
+	path = machina
+	url = https://github.com/ravahn/machina/

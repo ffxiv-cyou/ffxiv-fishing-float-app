@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="FishingFloatApp/FishingFloatApp.csproj" />
+  <Project Path="machina/Machina.FFXIV/Machina.FFXIV.csproj" />
+  <Project Path="machina/Machina/Machina.csproj" />
+  <Project Path="PluginCommon/PluginCommon.FFXIV/Lotlab.PluginCommon.FFXIV.csproj" />
+  <Project Path="PluginCommon/PluginCommon/Lotlab.PluginCommon.csproj" />
+</Solution>
