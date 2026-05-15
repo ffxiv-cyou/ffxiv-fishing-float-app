@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:FishingFloatApp"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="WelcomeWindow" Height="300" Width="400">
+        Title="WelcomeWindow" Height="300" Width="440">
     <Window.Resources>
         <Style TargetType="Button" x:Key="Link">
             <Setter Property="Background" Value="Transparent"/>
@@ -57,12 +57,16 @@
         </StackPanel>
         <StackPanel Grid.Row="1">
             <Label Style="{StaticResource Title}">使用提醒</Label>
-            <TextBlock TextWrapping="Wrap" Margin="15, 5, 0, 5">1. 程序未使用注入方式，需要先启动程序再从大厅进入游戏。</TextBlock>
-            <TextBlock TextWrapping="Wrap" Margin="15, 5, 0, 5">2. 网络波动可能会导致数据解析失败，此时需要小退游戏重新进入。</TextBlock>
-            <StackPanel Orientation="Horizontal" Margin="10, 0, 0, 0">
-                <Label>3. 若您不介意使用ACT，建议使用我们的悬浮窗版本：</Label>
-                <Button Name="OverlayLink" Style="{StaticResource Link}" Click="openOverlayUrl" Content="链接"/>
+            <StackPanel Margin="10, 0, 0, 0">
+                <TextBlock TextWrapping="Wrap" Margin="5">1. 程序未使用注入方式，需要先启动程序再从大厅进入游戏。</TextBlock>
+                <TextBlock TextWrapping="Wrap" Margin="5">2. 网络波动可能会导致数据解析失败，此时需要小退游戏重新进入。</TextBlock>
+                <StackPanel Orientation="Horizontal">
+                    <Label>3. 若您不介意使用ACT，建议使用我们的悬浮窗版本：</Label>
+                    <Button Name="OverlayLink" Style="{StaticResource Link}" Click="openOverlayUrl" Content="链接"/>
+                </StackPanel>
+                <Label>4. 初次使用请调整悬浮窗位置后，右键点击锁定才能开始使用。</Label>
             </StackPanel>
+
         </StackPanel>
         <Button Grid.Row="2" Width="100" Click="Button_Click" >确定</Button>
     </Grid>

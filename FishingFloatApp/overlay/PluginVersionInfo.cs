@@ -15,8 +15,9 @@ namespace FishingFloatApp.Overlay
             var assembly = Assembly.GetExecutingAssembly().GetName();
             return JObject.FromObject(new
             {
-                version = assembly.Version?.ToString(),
-                variant = assembly.Name?.ToString(),
+                version = "1.1.1.0", // Compatible with OverlayToolkit v1.1.1
+                app_name = assembly.Name?.ToString(),
+                app_version = assembly.Version?.ToString(),
             });
         }
         public void Init(IEventRepo es)

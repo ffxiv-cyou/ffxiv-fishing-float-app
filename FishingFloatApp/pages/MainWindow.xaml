@@ -15,7 +15,6 @@
     ResizeMode="CanResize"
     ShowInTaskbar="False"
     Topmost="True"
-    MouseLeftButtonDown="Window_MouseLeftButtonDown"
     Title="{Binding Title}" 
     Left="{Binding Path=Left, Mode=TwoWay}"
     Top="{Binding Path=Top, Mode=TwoWay}"
@@ -29,15 +28,15 @@
                 UseAeroCaptionButtons="False" />
     </WindowChrome.WindowChrome>
     <Window.Resources>
-        <x:Array Type="Control" x:Key="menuItems" >
+        <ContextMenu x:Key="menu">
             <MenuItem Header="悬浮窗设置" Click="ClickSetting" />
             <MenuItem Header="历史记录" Click="ClickHistory" />
             <MenuItem Header="导出钓鱼笔记" Click="ClickExport" />
             <Separator />
+            <MenuItem Header="刷新" Click="ClickRefresh" />
             <MenuItem Header="窗口锁定/穿透" IsCheckable="True" IsChecked="{Binding Transparent}" />
-            <MenuItem Header="退出" Click="Exit_Click" />
-        </x:Array>
-        <ContextMenu x:Key="menu" ItemsSource="{StaticResource menuItems}" />
+            <MenuItem Header="退出" Click="ClickExit" />
+        </ContextMenu>
         <ContextMenu x:Key="webview_menu">
             <MenuItem Header="窗口锁定/穿透" IsCheckable="True" IsChecked="{Binding Transparent}" />
         </ContextMenu>

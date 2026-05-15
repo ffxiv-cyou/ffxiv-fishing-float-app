@@ -12,12 +12,9 @@ namespace FishingFloatApp.Overlay
 
         public PacketWorker()
         {
-            // TODO
-            //ffxiv.DataSubscription.NetworkReceived += onNetworkReceived;
-            //ffxiv.DataSubscription.NetworkSent += onNetworkSent;
         }
 
-        IEventRepo EventSource { get; set; }
+        IEventRepo? EventSource { get; set; }
 
         Dictionary<string, EventListener> Listeners { get; } = new Dictionary<string, EventListener>();
 
@@ -101,7 +98,7 @@ namespace FishingFloatApp.Overlay
             // Only register if this is the first time subscribing with this name, or the old event handler would be overwritten.
             if (!string.IsNullOrEmpty(listener.EventName) && !hasListeners)
             {
-                EventSource.RegisterEventTypes(listener.EventName);
+                EventSource?.RegisterEventTypes(listener.EventName);
             }
 
             return new JObject()

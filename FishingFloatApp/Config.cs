@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Web.WebView2.Core;
 using Newtonsoft.Json;
+using System.Diagnostics;
 using System.IO;
 
 namespace FishingFloatApp
@@ -35,13 +37,35 @@ namespace FishingFloatApp
             );
         }
 
+        public static string? GetWebview2Version()
+        {
+            var version = CoreWebView2Environment.GetAvailableBrowserVersionString();
+            return version;
+        }
+
+        public static string? GetPcapVersion()
+        {
+            var installPath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Npcap", "NPFInstall.exe");
+            if (File.Exists(installPath))
+            {
+                try
+                {
+                    var version = FileVersionInfo.GetVersionInfo(installPath);
+                    return version?.FileVersion;
+                }
+                catch { }
+            }
+
+            return null;
+        }
+
         public void EnsureFolder()
         {
             try
             {
                 if (!Directory.Exists(UserFolder))
                     Directory.CreateDirectory(UserFolder);
-            
+
                 if (!Directory.Exists(WebViewUserDataFolder))
                     Directory.CreateDirectory(WebViewUserDataFolder);
             }

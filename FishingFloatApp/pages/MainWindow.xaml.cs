@@ -106,6 +106,7 @@ namespace FishingFloatApp
 
         async private void onWebviewNavStart(object? sender, CoreWebView2NavigationStartingEventArgs e)
         {
+            Trace.TraceInformation($"WebView2 navigation starting: {e.Uri}");
             api.Initialize(webview.CoreWebView2, this);
             var dragScript = @"(() => {
                     document.addEventListener('mousedown', (e) => {
@@ -131,18 +132,7 @@ namespace FishingFloatApp
             Dispatcher.Invoke(cb);
         }
 
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed)
-                DragMove();
-        }
-
-        private void webview_MouseMove(object sender, MouseEventArgs e)
-        {
-            Trace.TraceInformation("Mouse moved over WebView2");
-        }
-
-        void Exit_Click(object sender, RoutedEventArgs e)
+        void ClickExit(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
         }
@@ -160,6 +150,11 @@ namespace FishingFloatApp
         private void ClickExport(object sender, RoutedEventArgs e)
         {
             CallFishingFloatMethod("openNoteExportPage");
+        }
+
+        private void ClickRefresh(object sender, RoutedEventArgs e)
+        {
+            webview.ExecuteScriptAsync($@"window.location='{vm.ShowingUri}';window.location.reload();");
         }
 
         void CallFishingFloatMethod(string name)

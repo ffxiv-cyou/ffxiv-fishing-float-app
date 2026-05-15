@@ -2,7 +2,9 @@ using FishingFloatApp.Overlay;
 using Machina.FFXIV;
 using Machina.Infrastructure;
 using Microsoft.Extensions.Logging;
+using Microsoft.Win32;
 using System.IO;
+using System.Reflection;
 
 namespace FishingFloatApp
 {
@@ -59,11 +61,23 @@ namespace FishingFloatApp
             Config.Load();
 
             initOverlayHandler();
+            checkUpdate();
         }
 
         public void Start()
         {
             monitor.Start();
+        }
+
+        async void checkUpdate()
+        {
+            var updater = new Updater("Lotlab", "ACT-Log-Compressor");
+            var assembly = Assembly.GetExecutingAssembly().GetName();
+            var latest = await updater.CheckUpdate(assembly.Version!);
+            if (latest != null) 
+            {
+                // 弹出更新提示
+            }
         }
 
         private void onMessageReceived(TCPConnection connection, long epoch, byte[] message)

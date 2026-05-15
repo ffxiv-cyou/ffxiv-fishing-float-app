@@ -11,9 +11,9 @@ namespace FishingFloatApp
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-
+#if DEBUG
             ConsoleHelper.AllocConsole();
-
+#endif
             var logFactory = LoggerFactory.Create((v) =>
             {
                 v.AddConsole();
@@ -28,10 +28,9 @@ namespace FishingFloatApp
 
             FisherDesktop main = new FisherDesktop(log);
             main.Init();
-
-            //if (main.Config.Debug)
-                //ConsoleHelper.AllocConsole();
-
+#if DEBUG
+            main.Config.FirstRun = true;
+#endif
             var start = () =>
             {
                 main.Start();
@@ -41,7 +40,13 @@ namespace FishingFloatApp
                 mw.Show();
             };
 
-            if (main.Config.FirstRun)
+            bool depenceniesMissing = false;
+            if (Config.GetWebview2Version() == null)
+                depenceniesMissing = true;
+            if (Config.GetPcapVersion() == null)
+                depenceniesMissing = true;
+
+            if (main.Config.FirstRun || depenceniesMissing)
             {
                 Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
                 WelcomeWindow welcome = new WelcomeWindow();

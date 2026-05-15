@@ -49,7 +49,6 @@ namespace FishingFloatApp
                             chrome.webview.hostObjects.OverlayPluginApi.callHandler(data, id);
                         },
                         __callback(id, data) {
-                            console.log('Received callback', id, data);
                             if (this.pendingCallbacks.has(id)) {
                                 var cb = this.pendingCallbacks.get(id);
                                 cb(JSON.stringify(data));

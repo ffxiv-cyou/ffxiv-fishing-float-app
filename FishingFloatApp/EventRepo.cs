@@ -80,6 +80,12 @@ namespace FishingFloatApp
                 log.LogError("Attempted to subscribe to unregistered event type: {0}", eventName);
                 return;
             }
+
+            if (subscribers[eventName].Contains(receiver))
+            {
+                log.LogWarning("Receiver is already subscribed to event type: {0}", eventName);
+                return;
+            }
             subscribers[eventName].Add(receiver);
         }
 
