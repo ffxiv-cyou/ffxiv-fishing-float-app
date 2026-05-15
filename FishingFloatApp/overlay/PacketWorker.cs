@@ -1,6 +1,6 @@
 using Lotlab.PluginCommon.FFXIV.Parser;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace FishingFloatApp.Overlay
 {
@@ -72,7 +72,7 @@ namespace FishingFloatApp.Overlay
                 eventType = listener.EventName;
             }
 
-            EventSource.DispatchEvent(JObject.FromObject(new
+            EventSource.DispatchEvent(JsonSerializer.SerializeToElement(new
             {
                 type = eventType,
                 name = listener.Name,
@@ -85,9 +85,9 @@ namespace FishingFloatApp.Overlay
             }));
         }
 
-        public JToken Subscribe(JObject req)
+        public JsonElement Subscribe(JsonElement req)
         {
-            var listener = req.ToObject<EventListener>();
+            var listener = req.Deserialize<EventListener>();
             if (string.IsNullOrEmpty(listener.Name))
                 return JsonHelper.Error("missing 'name' field");
 
@@ -101,32 +101,32 @@ namespace FishingFloatApp.Overlay
                 EventSource?.RegisterEventTypes(listener.EventName);
             }
 
-            return new JObject()
+            return JsonSerializer.SerializeToElement(new
             {
-                { "name", listener.Name },
-                { "evt_name", listener.EventName }
-            };
+                name = listener.Name,
+                evt_name = listener.EventName
+            });
         }
 
-        public JToken Unsubscribe(JObject req)
+        public JsonElement Unsubscribe(JsonElement req)
         {
-            var name = req.Value<string>("name");
-            if (string.IsNullOrEmpty(name))
+            if (!req.TryGetProperty("name", out var nameProp) || nameProp.ValueKind != JsonValueKind.String)
                 return JsonHelper.Error("missing 'name' field");
 
+            var name = nameProp.GetString()!;
             if (!Listeners.ContainsKey(name))
                 return JsonHelper.Error($"event {name} is not listen yet");
 
             Listeners.Remove(name);
-            return new JObject();
+            return JsonSerializer.SerializeToElement(new { });
         }
 
-        public JToken? HandleEvent(JObject req)
+        public JsonElement? HandleEvent(JsonElement req)
         {
-            var action = req.Value<string>("action");
-            if (string.IsNullOrEmpty(action))
+            if (!req.TryGetProperty("action", out var actionProp) || actionProp.ValueKind != JsonValueKind.String)
                 return JsonHelper.Error("missing 'action' field");
 
+            var action = actionProp.GetString()!;
             switch (action.ToLower())
             {
                 case "subscribe":
@@ -147,26 +147,26 @@ namespace FishingFloatApp.Overlay
 
         struct EventListener
         {
-            [JsonProperty("name")]
-            public string Name;
+            [JsonPropertyName("name")]
+            public string Name { get; set; }
 
-            [JsonProperty("evt_name")]
-            public string EventName;
+            [JsonPropertyName("evt_name")]
+            public string EventName { get; set; }
 
-            [JsonProperty("filters")]
-            public Filter[] Filters;
+            [JsonPropertyName("filters")]
+            public Filter[] Filters { get; set; }
         }
 
         struct Filter
         {
-            [JsonProperty("direction")]
-            public bool? IsSent;
-            [JsonProperty("length")]
-            public int? Length;
-            [JsonProperty("opcode")]
-            public int? Opcode;
-            [JsonProperty("self_actor")]
-            public bool? SelfActor;
+            [JsonPropertyName("direction")]
+            public bool? IsSent { get; set; }
+            [JsonPropertyName("length")]
+            public int? Length { get; set; }
+            [JsonPropertyName("opcode")]
+            public int? Opcode { get; set; }
+            [JsonPropertyName("self_actor")]
+            public bool? SelfActor { get; set; }
 
             public bool Match(bool isSent, int length, int opcode, bool actorSelf)
             {
@@ -182,31 +182,31 @@ namespace FishingFloatApp.Overlay
                 return true;
             }
 
-            public static Filter FromJson(JObject token)
+            public static Filter FromJson(JsonElement token)
             {
                 var f = new Filter();
-                if (token.TryGetValue("direction", out var direction))
+                if (token.TryGetProperty("direction", out var direction))
                 {
-                    if (direction.Type == JTokenType.String)
+                    if (direction.ValueKind == JsonValueKind.String)
                     {
-                        var dirStr = direction.ToString().ToLower();
+                        var dirStr = direction.GetString()!.ToLower();
                         if (dirStr == "send" || dirStr == "sent")
                             f.IsSent = true;
                         else if (dirStr == "recv" || dirStr == "received")
                             f.IsSent = false;
                     }
-                    else if (direction.Type == JTokenType.Boolean)
+                    else if (direction.ValueKind == JsonValueKind.True || direction.ValueKind == JsonValueKind.False)
                     {
-                        f.IsSent = direction.ToObject<bool>();
+                        f.IsSent = direction.GetBoolean();
                     }
                 }
-                if (token.TryGetValue("length", out var length) && length.Type == JTokenType.Integer)
+                if (token.TryGetProperty("length", out var length) && length.ValueKind == JsonValueKind.Number)
                 {
-                    f.Length = length.ToObject<int>();
+                    f.Length = length.GetInt32();
                 }
-                if (token.TryGetValue("opcode", out var opcode) && opcode.Type == JTokenType.Integer)
+                if (token.TryGetProperty("opcode", out var opcode) && opcode.ValueKind == JsonValueKind.Number)
                 {
-                    f.Opcode = opcode.ToObject<int>();
+                    f.Opcode = opcode.GetInt32();
                 }
                 return f;
             }

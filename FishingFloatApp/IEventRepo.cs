@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System.Text.Json;
 
 namespace FishingFloatApp
 {
@@ -6,7 +6,7 @@ namespace FishingFloatApp
     {
         void RegisterHandler(string methodName, EventHandlerDelegate handler);
         void RegisterHandler(IWorker handler);
-        void DispatchEvent(JObject e);
+        void DispatchEvent(JsonElement e);
         void RegisterEventTypes(params string[] types);
     }
 }

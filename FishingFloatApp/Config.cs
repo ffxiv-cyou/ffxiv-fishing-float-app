@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Web.WebView2.Core;
-using Newtonsoft.Json;
 using System.Diagnostics;
 using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace FishingFloatApp
 {
@@ -89,10 +90,13 @@ namespace FishingFloatApp
             {
                 try
                 {
-                    var serializer = JsonSerializer.CreateDefault();
-                    using (var sw = new StreamWriter(FilePath))
+                    var options = new JsonSerializerOptions
                     {
-                        serializer.Serialize(sw, this);
+                        WriteIndented = true
+                    };
+                    using (var sw = new FileStream(FilePath, FileMode.Create, FileAccess.Write))
+                    {
+                        JsonSerializer.Serialize(sw, this, options);
                     }
                 }
                 catch (Exception ex)
@@ -109,10 +113,13 @@ namespace FishingFloatApp
 
             try
             {
-                var serializer = JsonSerializer.CreateDefault();
-                using (var sr = new StreamReader(FilePath))
+                var options = new JsonSerializerOptions
                 {
-                    var obj = serializer.Deserialize(sr, typeof(Config)) as Config;
+                    PropertyNameCaseInsensitive = true
+                };
+                using (var sr = new FileStream(FilePath, FileMode.Open, FileAccess.Read))
+                {
+                    var obj = JsonSerializer.Deserialize(sr, typeof(Config), options) as Config;
                     if (obj != null)
                     {
                         Clone(obj);

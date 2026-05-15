@@ -1,8 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Web.WebView2.Core;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 
 namespace FishingFloatApp
 {
@@ -15,7 +14,7 @@ namespace FishingFloatApp
         private ILogger log { get; }
         private IInvoker? invoker { get; set; }
 
-        public delegate JToken? CallHandlerDelegate(string data);
+        public delegate JsonElement? CallHandlerDelegate(string data);
 
         [ComVisible(false)]
         public CallHandlerDelegate? CallHandler { get; set; }
@@ -63,7 +62,7 @@ namespace FishingFloatApp
         }
 
         [ComVisible(false)]
-        void Callback(string callbackId, JToken? jsonObject)
+        void Callback(string callbackId, JsonElement? jsonObject)
         {
             if (webview == null)
             {
@@ -73,7 +72,7 @@ namespace FishingFloatApp
 
             invoker?.Invoke(() =>
             {
-                webview.ExecuteScriptAsync($"window.OverlayPluginApi.__callback('{callbackId}', {jsonObject?.ToString(Formatting.None) ?? "undefined"});");
+                webview.ExecuteScriptAsync($"window.OverlayPluginApi.__callback('{callbackId}', {jsonObject?.ToString() ?? "undefined"});");
             });
         }
 
@@ -96,14 +95,14 @@ namespace FishingFloatApp
                     log.LogError(ex, "Error handling callHandler with data: " + data);
                     if (!string.IsNullOrEmpty(callbackId))
                     {
-                        Callback(callbackId, new JObject { ["error"] = ex.Message });
+                        Callback(callbackId, JsonSerializer.SerializeToElement(new { error = ex.Message }));
                     }
                 }
             });
         }
 
         [ComVisible(false)]
-        public void HandleEvent(JObject e)
+        public void HandleEvent(JsonElement e)
         {
             if (webview == null)
             {
@@ -112,10 +111,10 @@ namespace FishingFloatApp
             }
             invoker?.Invoke(() =>
             {
-                webview.ExecuteScriptAsync($"if(window.__OverlayCallback) __OverlayCallback({e.ToString(Formatting.None)})");
+                webview.ExecuteScriptAsync($"if(window.__OverlayCallback) __OverlayCallback({e.ToString()})");
             });
         }
     }
 
-    public delegate JToken? EventHandlerDelegate(JObject e);
+    public delegate JsonElement? EventHandlerDelegate(JsonElement e);
 }

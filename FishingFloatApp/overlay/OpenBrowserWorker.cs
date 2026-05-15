@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using System.Text.Json;
 
 namespace FishingFloatApp.Overlay
 {
@@ -9,9 +9,12 @@ namespace FishingFloatApp.Overlay
     class OpenBrowserWorker : IWorker
     {
         string IWorker.Name => "otk::open_browser";
-        JToken? IWorker.HandleEvent(JObject req)
+        JsonElement? IWorker.HandleEvent(JsonElement req)
         {
-            var url = req.Value<string>("url");
+            if (!req.TryGetProperty("url", out var urlProp) || urlProp.ValueKind != JsonValueKind.String)
+                return JsonHelper.Error("Missing 'url' field");
+
+            var url = urlProp.GetString();
             if (string.IsNullOrEmpty(url))
                 return JsonHelper.Error("Missing 'url' field");
 
@@ -27,10 +30,10 @@ namespace FishingFloatApp.Overlay
             try
             {
                 OpenUrl(url);
-                return new JObject()
+                return JsonSerializer.SerializeToElement(new
                 {
-                    ["url"] = url,
-                };
+                    url = url,
+                });
             }
             catch (Exception ex)
             {

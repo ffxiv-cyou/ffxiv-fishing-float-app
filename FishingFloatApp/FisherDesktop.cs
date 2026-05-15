@@ -1,4 +1,5 @@
 using FishingFloatApp.Overlay;
+using FishingFloatApp.pages;
 using Machina.FFXIV;
 using Machina.Infrastructure;
 using Microsoft.Extensions.Logging;
@@ -71,12 +72,15 @@ namespace FishingFloatApp
 
         async void checkUpdate()
         {
-            var updater = new Updater("Lotlab", "ACT-Log-Compressor");
+            var updater = new Updater("ffxiv-cyou", "ffxiv-fishing-float-app");
             var assembly = Assembly.GetExecutingAssembly().GetName();
             var latest = await updater.CheckUpdate(assembly.Version!);
             if (latest != null) 
             {
                 // 弹出更新提示
+                var vm = new CheckUpdateViewModel(assembly.Version!.ToString(), latest.Value);
+                var window = new CheckUpdate(vm);
+                window.Show();
             }
         }
 

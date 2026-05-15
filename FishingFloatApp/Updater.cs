@@ -15,21 +15,22 @@ namespace FishingFloatApp
 
         public struct Release
         {
-            public string url;
-            public string html_url;
-            public string tag_name;
-            public string name;
-            public bool draft;
-            public bool prerelease;
-            public string created_at;
-            public string updated_at;
-            public string publish_at;
-            public string body;
+            public string url { get; set; }
+            public string html_url { get; set; }
+            public string tag_name { get; set; }
+            public string name { get; set; }
+            public bool draft { get; set; }
+            public bool prerelease { get; set; }
+            public string created_at { get; set; }
+            public string updated_at { get; set; }
+            public string publish_at { get; set; }
+            public string body { get; set; }
         }
 
         async Task<Release[]> GetReleasesAsync()
         {
             HttpClient client = new HttpClient();
+            client.DefaultRequestHeaders.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("FishingFloatApp", "1.0"));
             var resp = await client.GetAsync(url);
             if (!resp.IsSuccessStatusCode)
                 return Array.Empty<Release>();

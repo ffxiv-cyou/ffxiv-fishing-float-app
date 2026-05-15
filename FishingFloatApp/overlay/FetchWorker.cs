@@ -1,15 +1,15 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Net.Http;
+﻿using System.Net.Http;
+using System.Text.Json;
 
 namespace FishingFloatApp.Overlay
 {
     public static class JsonHelper
     {
-        public static JToken Error(string message)
+        public static JsonElement Error(string message)
         {
-            return JObject.FromObject(new
+            return JsonSerializer.SerializeToElement(new
             {
-                Error = message
+                error = message
             });
         }
     }
@@ -18,9 +18,9 @@ namespace FishingFloatApp.Overlay
     {
         public string Name => "otk::fetch";
 
-        public async Task<JToken> Fetch(JObject req)
+        public async Task<JsonElement> Fetch(JsonElement req)
         {
-            var request = req.ToObject<FetchRequest>();
+            var request = JsonSerializer.Deserialize<FetchRequest>(req);
             if (string.IsNullOrEmpty(request?.resource))
                 return JsonHelper.Error("Missing resource field");
 
@@ -35,22 +35,22 @@ namespace FishingFloatApp.Overlay
             return await FromResponse(resp);
         }
 
-        static async Task<JToken> FromResponse(HttpResponseMessage msg)
+        static async Task<JsonElement> FromResponse(HttpResponseMessage msg)
         {
-            var headersObj = new JObject();
+            var headersObj = new Dictionary<string, string>();
             foreach (var header in msg.Headers)
-                headersObj[header.Key] = JToken.FromObject(header.Value);
+                headersObj[header.Key] = string.Join(", ", header.Value);
 
-            return JObject.FromObject(new FetchResponse(msg, await msg.Content.ReadAsStringAsync()));
+            return JsonSerializer.SerializeToElement(new FetchResponse(msg, await msg.Content.ReadAsStringAsync()));
         }
 
-        public JToken? HandleEvent(JObject token)
+        public JsonElement? HandleEvent(JsonElement token)
         {
             var req = Fetch(token);
             req.Wait(3000);
 
             if (req.Exception != null)
-                return JObject.FromObject(req.Exception);
+                return JsonHelper.Error(req.Exception.Message);
 
             return req.Result;
         }
@@ -109,13 +109,13 @@ namespace FishingFloatApp.Overlay
     
         class FetchResponse
         {
-            public Dictionary<string, string> headers;
-            public bool ok;
-            public int status;
-            public string statusText;
-            public string type;
-            public string url;
-            public string body;
+            public Dictionary<string, string> headers { get; set; }
+            public bool ok { get; set; }
+            public int status { get; set; }
+            public string statusText { get; set; }
+            public string type { get; set; }
+            public string url { get; set; }
+            public string body { get; set; }
 
             public FetchResponse(HttpResponseMessage msg, string body)
             {

@@ -1,17 +1,17 @@
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace FishingFloatApp
 {
     public interface IEventReceiver
     {
-        void HandleEvent(JObject e);
+        void HandleEvent(JsonElement e);
     }
 
     public interface IWorker
     {
         string Name { get; }
-        JToken? HandleEvent(JObject e);
+        JsonElement? HandleEvent(JsonElement e);
         void Init(IEventRepo repo);
     }
 
@@ -40,37 +40,36 @@ namespace FishingFloatApp
             }
         }
 
-        public JToken? Subscribe(IEventReceiver receiver, JObject e)
+        public JsonElement? Subscribe(IEventReceiver receiver, JsonElement e)
         {
-            if (!e.ContainsKey("events"))
+            if (!e.TryGetProperty("events", out var events))
             {
                 log.LogError("events field is not found");
                 return null;
             }
 
-            var events = e["events"]!;
             log.LogInformation("subscribing to events: {events}", events);
 
-            foreach (var item in events.ToArray())
+            foreach (var item in events.EnumerateArray())
             {
                 Subscribe(item.ToString(), receiver);
             }
 
-            return "{}";
+            return new JsonElement();
         }
 
-        public JToken? Unsubscribe(IEventReceiver receiver, JObject e)
+        public JsonElement? Unsubscribe(IEventReceiver receiver, JsonElement e)
         {
-            if (!e.ContainsKey("events"))
+            if (!e.TryGetProperty("events", out var events))
             {
                 log.LogError("events field is not found");
                 return null;
             }
-            foreach (var item in e["events"]!.ToArray())
+            foreach (var item in events.EnumerateArray())
             {
                 Unsubscribe(item.ToString(), receiver);
             }
-            return "{}";
+            return new JsonElement();
         }
 
         public void Subscribe(string eventName, IEventReceiver receiver)
@@ -113,9 +112,14 @@ namespace FishingFloatApp
         /// 分发事件
         /// </summary>
         /// <param name="e"></param>
-        public void DispatchEvent(JObject e)
+        public void DispatchEvent(JsonElement e)
         {
-            var type = e["type"]?.ToString();
+            if (!e.TryGetProperty("type", out var typeProperty))
+            {
+                log.LogError("missing type field");
+                return;
+            }
+            var type = typeProperty.GetString();
             if (type == null)
             {
                 log.LogError("missing type field");
@@ -154,15 +158,20 @@ namespace FishingFloatApp
             RegisterHandler(handler.Name, handler.HandleEvent);
         }
 
-        public JToken? handleCallSync(string data)
+        public JsonElement? handleCallSync(string data)
         {
-            var obj = JObject.Parse(data);
-            if (!obj.ContainsKey("call"))
+            var obj = JsonElement.Parse(data);
+            if (!obj.TryGetProperty("call", out var callProperty))
             {
                 log.LogError("No call method specified in data: " + data);
                 return null;
             }
-            var callMethod = obj["call"]!.ToString();
+            var callMethod = callProperty.GetString();
+            if (callMethod == null)
+            {
+                log.LogError("No call method specified in data: " + data);
+                return null;
+            }
             if (!handlers.ContainsKey(callMethod))
             {
                 log.LogError("No handler registered for call method: " + callMethod);

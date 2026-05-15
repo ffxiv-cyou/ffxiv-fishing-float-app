@@ -1,8 +1,6 @@
-using Newtonsoft.Json.Linq;
-using System.Diagnostics;
-using System.Diagnostics.Tracing;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 
 namespace FishingFloatApp.Overlay
 {
@@ -37,9 +35,9 @@ namespace FishingFloatApp.Overlay
             repo.RegisterHandler(this);
         }
 
-        public JToken? HandleEvent(JObject e)
+        public JsonElement? HandleEvent(JsonElement e)
         {
-            JToken fallback = "{}";
+            JsonElement fallback = JsonSerializer.SerializeToElement(new { });
 
             IntPtr hWindow = FindWindow(null, "最终幻想XIV");
             if (hWindow == IntPtr.Zero)
@@ -64,7 +62,7 @@ namespace FishingFloatApp.Overlay
             try
             {
                 var version = System.IO.File.ReadAllText(versionPath);
-                return JObject.FromObject(new
+                return JsonSerializer.SerializeToElement(new
                 {
                     version = version.Trim(),
                     lang = 6,

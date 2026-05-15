@@ -1,0 +1,39 @@
+﻿<Window x:Class="FishingFloatApp.pages.CheckUpdate"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FishingFloatApp.pages"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanMinimize"
+        d:DataContext="{d:DesignInstance Type=local:CheckUpdateViewModel}"
+        Title="检查更新" Height="280" Width="400">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <Label Content="检测到新版本" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Label Content="当前版本:"/>
+            <Label Content="{Binding Mode=OneWay, Path=CurrentVersion}"/>
+            <Label Content="最新版本:"/>
+            <Label Content="{Binding Mode=OneWay, Path=Version}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Top">
+            <Label Content="{Binding Mode=OneWay, Path=Name}"/>
+            <TextBlock Text="{Binding Mode=OneWay, Path=Content}" TextWrapping="Wrap" Margin="10, 0, 0, 0"/>
+        </StackPanel>
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Button Content="下载更新" Margin="10" Padding="10, 5" Click="OpenDownloadUrl"/>
+            <Button Content="稍后再说" Margin="10" Padding="10, 5" Click="Close"/>
+        </StackPanel>
+        <Label Grid.Row="1" Content="{Binding VersionInfo}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    </Grid>
+</Window>

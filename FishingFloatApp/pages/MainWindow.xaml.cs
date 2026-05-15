@@ -1,11 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Web.WebView2.Core;
-using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Interop;
 
 namespace FishingFloatApp
@@ -55,8 +54,8 @@ namespace FishingFloatApp
             try
             {
                 var json = e.WebMessageAsJson;
-                var obj = JObject.Parse(json);
-                var type = obj["type"]?.ToString();
+                var obj = JsonElement.Parse(json);
+                var type = obj.GetProperty("type").GetString();
 
                 if (!vm.Transparent && type == "startWindowDrag")
                 {

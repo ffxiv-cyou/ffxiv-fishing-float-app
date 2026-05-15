@@ -28,9 +28,6 @@ namespace FishingFloatApp
 
             FisherDesktop main = new FisherDesktop(log);
             main.Init();
-#if DEBUG
-            main.Config.FirstRun = true;
-#endif
             var start = () =>
             {
                 main.Start();
