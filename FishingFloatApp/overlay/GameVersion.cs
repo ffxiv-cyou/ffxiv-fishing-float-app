@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
@@ -12,7 +13,7 @@ namespace FishingFloatApp.Overlay
         public string Name => "otk::game_ver";
 
         [DllImport("user32.dll", EntryPoint = "FindWindow", CharSet = CharSet.Unicode)]
-        private static extern IntPtr FindWindow(string? sClass, string? sWindow);
+        private static extern IntPtr FindWindow(string sClass, string sWindow);
 
         [DllImport("user32.dll", EntryPoint = "FindWindowEx", CharSet = CharSet.Unicode)]
         private static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr childAfter, string className, string windowTitle);

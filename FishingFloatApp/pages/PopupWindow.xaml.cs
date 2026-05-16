@@ -1,4 +1,6 @@
 ﻿using Microsoft.Web.WebView2.Core;
+using System;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace FishingFloatApp
@@ -18,7 +20,7 @@ namespace FishingFloatApp
             };
         }
 
-        private void onTitleChanged(object? sender, object e)
+        private void onTitleChanged(object sender, object e)
         {
             Title = webview.CoreWebView2.DocumentTitle;
         }

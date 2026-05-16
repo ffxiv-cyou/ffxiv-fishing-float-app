@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace FishingFloatApp
@@ -14,7 +15,7 @@ namespace FishingFloatApp
 
         public string Title { get; set; } = "Fishing Float App";
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public string BackgroundColor
         {

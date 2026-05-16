@@ -1,4 +1,6 @@
 using Lotlab.PluginCommon.FFXIV.Parser;
+using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -14,7 +16,7 @@ namespace FishingFloatApp.Overlay
         {
         }
 
-        IEventRepo? EventSource { get; set; }
+        IEventRepo EventSource { get; set; }
 
         Dictionary<string, EventListener> Listeners { get; } = new Dictionary<string, EventListener>();
 
@@ -113,7 +115,7 @@ namespace FishingFloatApp.Overlay
             if (!req.TryGetProperty("name", out var nameProp) || nameProp.ValueKind != JsonValueKind.String)
                 return JsonHelper.Error("missing 'name' field");
 
-            var name = nameProp.GetString()!;
+            var name = nameProp.GetString();
             if (!Listeners.ContainsKey(name))
                 return JsonHelper.Error($"event {name} is not listen yet");
 
@@ -126,7 +128,7 @@ namespace FishingFloatApp.Overlay
             if (!req.TryGetProperty("action", out var actionProp) || actionProp.ValueKind != JsonValueKind.String)
                 return JsonHelper.Error("missing 'action' field");
 
-            var action = actionProp.GetString()!;
+            var action = actionProp.GetString();
             switch (action.ToLower())
             {
                 case "subscribe":
@@ -189,7 +191,7 @@ namespace FishingFloatApp.Overlay
                 {
                     if (direction.ValueKind == JsonValueKind.String)
                     {
-                        var dirStr = direction.GetString()!.ToLower();
+                        var dirStr = direction.GetString().ToLower();
                         if (dirStr == "send" || dirStr == "sent")
                             f.IsSent = true;
                         else if (dirStr == "recv" || dirStr == "received")

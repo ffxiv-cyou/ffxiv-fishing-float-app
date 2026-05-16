@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Windows;
 
 namespace FishingFloatApp
@@ -28,7 +29,7 @@ namespace FishingFloatApp
 
             FisherDesktop main = new FisherDesktop(log);
             main.Init();
-            var start = () =>
+            Action start = () =>
             {
                 main.Start();
 

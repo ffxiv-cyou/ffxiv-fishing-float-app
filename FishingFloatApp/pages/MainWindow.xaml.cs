@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Web.WebView2.Core;
+using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -49,7 +50,7 @@ namespace FishingFloatApp
             DataContext = vm;
         }
 
-        private void onMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
+        private void onMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
             try
             {
@@ -63,7 +64,7 @@ namespace FishingFloatApp
                 }
                 else if (type == "contextMenu")
                 {
-                    ContextMenu? menu = this.FindResource("webview_menu") as ContextMenu;
+                    ContextMenu menu = this.FindResource("webview_menu") as ContextMenu;
                     if (menu != null)
                     {
                         menu.Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint;
@@ -86,7 +87,7 @@ namespace FishingFloatApp
 
         private int retryCount = 0;
 
-        private void onWebviewNavComplete(object? sender, CoreWebView2NavigationCompletedEventArgs e)
+        private void onWebviewNavComplete(object sender, CoreWebView2NavigationCompletedEventArgs e)
         {
             if (!e.IsSuccess)
             {
@@ -103,7 +104,7 @@ namespace FishingFloatApp
             }
         }
 
-        async private void onWebviewNavStart(object? sender, CoreWebView2NavigationStartingEventArgs e)
+        async private void onWebviewNavStart(object sender, CoreWebView2NavigationStartingEventArgs e)
         {
             Trace.TraceInformation($"WebView2 navigation starting: {e.Uri}");
             api.Initialize(webview.CoreWebView2, this);
@@ -120,7 +121,7 @@ namespace FishingFloatApp
             _ = webview.CoreWebView2.ExecuteScriptAsync(dragScript);
         }
 
-        private void onWebviewNewWindowRequested(object? sender, CoreWebView2NewWindowRequestedEventArgs e)
+        private void onWebviewNewWindowRequested(object sender, CoreWebView2NewWindowRequestedEventArgs e)
         {
             var popup = new PopupWindow();
             Invoke(() => popup.Show(e));

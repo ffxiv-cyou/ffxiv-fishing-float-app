@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.Text.Json;
 
 namespace FishingFloatApp
@@ -20,9 +21,9 @@ namespace FishingFloatApp
     /// </summary>
     class EventRepo : IEventRepo
     {
-        Dictionary<string, EventHandlerDelegate> handlers { get; } = new();
+        Dictionary<string, EventHandlerDelegate> handlers { get; } = new Dictionary<string, EventHandlerDelegate>();
 
-        Dictionary<string, List<IEventReceiver>> subscribers { get; } = new();
+        Dictionary<string, List<IEventReceiver>> subscribers { get; } = new Dictionary<string, List<IEventReceiver>>();
 
         ILogger log { get; }
 

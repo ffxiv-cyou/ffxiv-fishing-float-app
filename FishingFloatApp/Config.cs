@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Web.WebView2.Core;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
@@ -19,7 +20,7 @@ namespace FishingFloatApp
         public string UserFolder { get; } = "";
 
         [JsonIgnore]
-        ILogger? Logger { get; }
+        ILogger Logger { get; }
 
         [JsonIgnore]
         public bool FirstRun { get; set; } = true;
@@ -38,15 +39,15 @@ namespace FishingFloatApp
             );
         }
 
-        public static string? GetWebview2Version()
+        public static string GetWebview2Version()
         {
             var version = CoreWebView2Environment.GetAvailableBrowserVersionString();
             return version;
         }
 
-        public static string? GetPcapVersion()
+        public static string GetPcapVersion()
         {
-            var installPath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Npcap", "NPFInstall.exe");
+            var installPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Npcap", "NPFInstall.exe");
             if (File.Exists(installPath))
             {
                 try

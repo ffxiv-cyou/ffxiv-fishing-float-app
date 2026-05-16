@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Web.WebView2.Core;
+using System;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace FishingFloatApp
 {
@@ -9,15 +11,15 @@ namespace FishingFloatApp
     [ComVisible(true)]
     public class OverlayPluginApi : IEventReceiver
     {
-        private CoreWebView2? webview { get; set; } = null;
+        private CoreWebView2 webview { get; set; } = null;
 
         private ILogger log { get; }
-        private IInvoker? invoker { get; set; }
+        private IInvoker invoker { get; set; }
 
         public delegate JsonElement? CallHandlerDelegate(string data);
 
         [ComVisible(false)]
-        public CallHandlerDelegate? CallHandler { get; set; }
+        public CallHandlerDelegate CallHandler { get; set; }
 
         public OverlayPluginApi(ILogger logger)
         {
