@@ -44,6 +44,6 @@
     <Grid>
         <tb:TaskbarIcon ToolTipText="杆时悬浮窗" ContextMenu="{StaticResource ResourceKey=menu}" IconSource="/icon.ico">
         </tb:TaskbarIcon>
-        <Wpf:WebView2 Margin="4, 4, 4, 4" x:Name="webview" Source="{Binding ShowingUri}"/>
+        <Wpf:WebView2 Margin="4, 4, 4, 4" x:Name="webview" Source="{Binding ShowingUri}" DefaultBackgroundColor="Transparent"/>
     </Grid>
 </Window>
