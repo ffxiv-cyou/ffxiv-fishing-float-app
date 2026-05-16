@@ -22,8 +22,8 @@ namespace FishingFloatApp.Overlay
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle, uint dwProcessId);
 
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        static extern bool QueryFullProcessImageName(IntPtr hProcess, uint dwFlags, [Out, MarshalAs(UnmanagedType.LPTStr)] StringBuilder lpExeName, ref uint lpdwSize);
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        static extern bool QueryFullProcessImageName(IntPtr hProcess, uint dwFlags, [Out] StringBuilder lpExeName, ref int lpdwSize);
 
         const uint PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
 
@@ -52,8 +52,8 @@ namespace FishingFloatApp.Overlay
             if (process == IntPtr.Zero)
                 return fallback;
 
-            StringBuilder sb = new StringBuilder();
-            uint size = 1024;
+            int size = 1024;
+            StringBuilder sb = new StringBuilder(size);
             if (!QueryFullProcessImageName(process, 0, sb, ref size))
                 return fallback;
 
