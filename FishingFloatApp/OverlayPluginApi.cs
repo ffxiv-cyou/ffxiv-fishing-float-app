@@ -33,7 +33,7 @@ namespace FishingFloatApp
             this.invoker = invoker;
 
             webview.AddHostObjectToScript("OverlayPluginApi", this);
-            var initScript = @"(() => {
+            var initScript = @"setTimeout(() => {
                     window.OverlayPluginApi = {
                         overlayName: null,
                         overlayUuid: null,
@@ -59,7 +59,7 @@ namespace FishingFloatApp
                             }
                         }
                     };
-                })();";
+                }, 100);";
             webview.ExecuteScriptAsync(initScript);
         }
 

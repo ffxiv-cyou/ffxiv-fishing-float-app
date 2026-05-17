@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.Windows;
 
 namespace FishingFloatApp
@@ -14,7 +15,9 @@ namespace FishingFloatApp
             base.OnStartup(e);
 #if DEBUG
             ConsoleHelper.AllocConsole();
+            Trace.Listeners.Add(new ConsoleTraceListener());
 #endif
+
             var logFactory = LoggerFactory.Create((v) =>
             {
                 v.AddConsole();

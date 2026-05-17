@@ -41,7 +41,12 @@ namespace FishingFloatApp
             OpenBrowserWorker.OpenUrl("https://fisher.ffxiv.cyou/");
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void openHelpUrl(object sender, RoutedEventArgs e)
+        {
+            OpenBrowserWorker.OpenUrl("https://fisher.ffxiv.cyou/web/#/help/app");
+        }
+
+        private void closeWindow(object sender, RoutedEventArgs e)
         {
             Close();
         }
