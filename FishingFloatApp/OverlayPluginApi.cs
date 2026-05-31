@@ -16,14 +16,23 @@ namespace FishingFloatApp
         private ILogger log { get; }
         private IInvoker invoker { get; set; }
 
+        private string overlayName { get; }
+
+        private string overlayUuid { get; }
+
+
         public delegate JsonElement? CallHandlerDelegate(string data);
 
         [ComVisible(false)]
         public CallHandlerDelegate CallHandler { get; set; }
 
-        public OverlayPluginApi(ILogger logger)
+        public OverlayPluginApi(ILogger logger, string name = "")
         {
             this.log = logger;
+            if (string.IsNullOrEmpty(name))
+                name = "default";
+            this.overlayName = name;
+            this.overlayUuid = Guid.NewGuid().ToString();
         }
 
         [ComVisible(false)]
@@ -35,8 +44,8 @@ namespace FishingFloatApp
             webview.AddHostObjectToScript("OverlayPluginApi", this);
             var initScript = @"setTimeout(() => {
                     window.OverlayPluginApi = {
-                        overlayName: null,
-                        overlayUuid: null,
+                        overlayName: '" + this.overlayName + @"',
+                        overlayUuid: '" + this.overlayUuid + @"',
                         ready: true,
                         desktopApp: true,
                         sequence: 0,

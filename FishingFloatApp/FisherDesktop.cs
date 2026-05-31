@@ -3,8 +3,6 @@ using FishingFloatApp.pages;
 using Machina.FFXIV;
 using Machina.Infrastructure;
 using Microsoft.Extensions.Logging;
-using Microsoft.Win32;
-using System.IO;
 using System.Reflection;
 
 namespace FishingFloatApp
@@ -28,7 +26,7 @@ namespace FishingFloatApp
             this.log = logger;
 
             repo = new EventRepo(log);
-            Api = new OverlayPluginApi(log);
+            Api = new OverlayPluginApi(log, "FisherDesktop");
             Config = new Config(log);
 
             Api.CallHandler = repo.handleCallSync;

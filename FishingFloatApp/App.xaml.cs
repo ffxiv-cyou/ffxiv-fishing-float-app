@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Windows;
 
 namespace FishingFloatApp
@@ -10,6 +11,8 @@ namespace FishingFloatApp
     /// </summary>
     public partial class App : Application
     {
+        Mutex globalMutex { get; set; }
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -29,6 +32,14 @@ namespace FishingFloatApp
 
             // allow auto play audio
             Environment.SetEnvironmentVariable("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", "--autoplay-policy=no-user-gesture-required");
+
+            globalMutex = new Mutex(false, "FisherDesktop", out bool mutexWasCreated);
+            if (!mutexWasCreated)
+            {
+                MessageBox.Show("已经启动了一个实例，请查看右下角通知栏", "没有更多效果了……");
+                Shutdown(1);
+                return;
+            }
 
             FisherDesktop main = new FisherDesktop(log);
             main.Init();
