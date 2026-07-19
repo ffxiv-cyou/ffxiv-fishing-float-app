@@ -1,12 +1,16 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using Microsoft.Web.WebView2.Core;
+using Microsoft.Web.WebView2.Core.DevToolsProtocolExtension;
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
+using static Microsoft.Web.WebView2.Core.DevToolsProtocolExtension.Runtime;
 
 namespace FishingFloatApp
 {
@@ -45,9 +49,64 @@ namespace FishingFloatApp
                 webview.CoreWebView2.ContextMenuRequested += (s2, e2) => e2.Handled = true; // disable context menu
                 webview.CoreWebView2.NewWindowRequested += onWebviewNewWindowRequested;
                 webview.CoreWebView2.WebMessageReceived += onMessageReceived;
+                var devTools = webview.CoreWebView2.GetDevToolsProtocolHelper();
+                await devTools.Runtime.EnableAsync();
+                devTools.Runtime.ConsoleAPICalled += onLogEntryAdded;
             };
 
             DataContext = vm;
+        }
+
+        private void onLogEntryAdded(object sender, Runtime.ConsoleAPICalledEventArgs e)
+        {
+            try
+            {
+                var logLevel = LogLevel.Information;
+                switch (e.Type)
+                {
+                    case "verbose":
+                        logLevel = LogLevel.Debug;
+                        break;
+                    case "log":
+                    case "info":
+                        logLevel = LogLevel.Information;
+                        break;
+                    case "warning":
+                        logLevel = LogLevel.Warning;
+                        break;
+                    case "error":
+                        logLevel = LogLevel.Error;
+                        break;
+                }
+
+                StringBuilder sb = new StringBuilder();
+                foreach (var item in e.Args)
+                {
+                    sb.Append(ConvertRemoteObject(item));
+                    sb.Append(' ');
+                }
+
+                logger.Log(logLevel, sb.ToString());
+            }
+            catch { }
+        }
+
+        private string ConvertRemoteObject(RemoteObject obj)
+        {
+            if (obj == null) return "null";
+
+            switch (obj.Type)
+            {
+                case "string": return obj.Value?.ToString() ?? "";
+                case "number": return obj.Value?.ToString() ?? "NaN";
+                case "boolean": return obj.Value?.ToString() ?? "false";
+                case "undefined": return "undefined";
+                case "null": return "null";
+                case "object":   // fall through
+                case "array":    // 序列化为 JSON 字符串
+                    return obj.Description;
+                default: return obj.Value?.ToString() ?? "[unknown]";
+            }
         }
 
         private void onMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)

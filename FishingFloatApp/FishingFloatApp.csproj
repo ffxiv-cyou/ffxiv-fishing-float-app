@@ -24,6 +24,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.8" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.8" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3967.48" />
+    <PackageReference Include="Microsoft.Web.WebView2.DevToolsProtocolExtension" Version="1.0.2901" />
   </ItemGroup>
 
   <ItemGroup>
