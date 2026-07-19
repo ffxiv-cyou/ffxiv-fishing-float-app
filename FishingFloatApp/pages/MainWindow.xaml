@@ -35,6 +35,7 @@
             <Separator />
             <MenuItem Header="刷新" Click="ClickRefresh" />
             <MenuItem Header="窗口锁定/穿透" IsCheckable="True" IsChecked="{Binding Transparent}" />
+            <MenuItem Header="内存读取" IsCheckable="True" IsChecked="{Binding MemoryScanMode}" />
             <MenuItem Header="退出" Click="ClickExit" />
         </ContextMenu>
         <ContextMenu x:Key="webview_menu">

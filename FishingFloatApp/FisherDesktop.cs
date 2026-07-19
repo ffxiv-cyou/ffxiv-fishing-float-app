@@ -1,9 +1,13 @@
+using FishingFloatApp.memory;
 using FishingFloatApp.Overlay;
 using FishingFloatApp.pages;
 using Machina.FFXIV;
 using Machina.Infrastructure;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.Reflection;
+using System.Security.Principal;
+using System.Windows;
 
 namespace FishingFloatApp
 {
@@ -20,6 +24,11 @@ namespace FishingFloatApp
         FFXIVNetworkMonitor monitor { get; } = new FFXIVNetworkMonitor();
 
         PacketWorker packetWorker { get; } = new PacketWorker();
+
+        MemoryScanner Memory { get; set; }
+
+        SigScanner SigScanner { get; set; }
+
 
         public FisherDesktop(ILogger logger)
         {
@@ -39,28 +48,137 @@ namespace FishingFloatApp
             monitor.UseDeucalion = false;
             monitor.MessageReceivedEventHandler += onMessageReceived;
             monitor.MessageSentEventHandler += onMessageSent;
+            monitor.DecodeFailedEvent += onDecodeFailed;
         }
 
         private void initOverlayHandler()
         {
+            var pluginVer = new PluginVersionInfo();
             var workers = new IWorker[] {
+                pluginVer,
                 new GameVersion(),
-                new PluginVersionInfo(),
                 new FetchWorker(),
                 new OpenBrowserWorker(),
-                packetWorker};
+                packetWorker,
+                new MemoryWorker(SigScanner),
+            };
+
+            pluginVer.SetWorkers(workers);
 
             foreach (var item in workers)
                 item.Init(repo);
         }
 
-        public void Init()
+        bool isUAC()
+        {
+            var identity = WindowsIdentity.GetCurrent();
+            var principal = new WindowsPrincipal(identity);
+            return principal.IsInRole(WindowsBuiltInRole.Administrator);
+        }
+
+        void restartCurrent()
+        {
+            var current = Process.GetCurrentProcess();
+            var process = new Process();
+            process.StartInfo = new ProcessStartInfo()
+            {
+                Verb = "runas",
+                FileName = current.MainModule.FileName,
+            };
+            process.Start();
+        }
+
+        public bool Init()
         {
             Config.EnsureFolder();
             Config.Load();
 
+            if (Config.MemoryScanMode)
+            {
+                if (!isUAC())
+                {
+                    // 请求UAC重启当前exe
+                    restartCurrent();
+                    return false;
+                }
+
+                TryCreateMemoryScanner();
+            }
+
             initOverlayHandler();
             checkUpdate();
+
+            return true;
+        }
+
+        void TryCreateMemoryScanner()
+        {
+            var processes = SigScanner.GetFFXIVProcesses();
+            if (processes.Length == 0)
+            {
+                Memory = null;
+                SigScanner = null;
+                return;
+            }
+
+            var process = processes[0];
+            if (SigScanner != null && SigScanner.ProcessID == process.Id)
+            {
+                return;
+            }
+
+            SigScanner = new SigScanner(process);
+            Memory = new MemoryScanner(SigScanner);
+            Memory.Init();
+        }
+
+        MemoryScanner.OodleSizes OodleTcpSize = new MemoryScanner.OodleSizes()
+        {
+            StateSize = 84104,
+            SharedSize = 1048608,
+            WindowSize = 0x100000,
+        };
+
+        private void onDecodeFailed(FFXIVBundleDecoder decoder, TCPConnection conn, bool tx)
+        {
+            // Lobby port
+            if (conn.RemotePort >= 54992 && conn.RemotePort <= 54994)
+                return;
+
+            TryCreateMemoryScanner();
+
+            if (Memory == null)
+                return;
+
+            if (!Memory.NetworkConnected)
+                return;
+
+            // try to figure out which channel...
+            bool isChatChannel = false;
+            var connections = monitor.Connections;
+            foreach (var item in connections) 
+            {
+                if (item.RemoteIP != conn.RemoteIP || item.RemotePort != conn.RemotePort)
+                    continue;
+
+                // chat channel is open AFTER zone channel, so its port may be large
+                if (item.LocalPort < conn.LocalPort)
+                    isChatChannel = true;
+            }
+             
+            var state = isChatChannel ? Memory.GetChatState(OodleTcpSize) : Memory.GetZoneState(OodleTcpSize);
+            if (state == null)
+            {
+                Trace.TraceWarning($"Failed to get oodle state from memory");
+                return;
+            }
+
+            monitor.SetOodleState(conn, true, state.Value.Tx.State, state.Value.Tx.Shared, state.Value.Tx.Window);
+            monitor.SetOodleState(conn, false, state.Value.Rx.State, state.Value.Rx.Shared, state.Value.Rx.Window);
+
+            var chName = isChatChannel ? "Chat" : "Zone";
+
+            Trace.TraceInformation($"{chName} {conn} state reset.");
         }
 
         public void Start()

@@ -85,6 +85,8 @@ namespace FishingFloatApp
 
         public bool Debug { get; set; } = false;
 
+        public bool MemoryScanMode { get; set; } = true;
+
         public void Save()
         {
             lock (this)

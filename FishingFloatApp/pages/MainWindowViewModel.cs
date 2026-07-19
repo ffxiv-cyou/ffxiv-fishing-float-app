@@ -35,6 +35,16 @@ namespace FishingFloatApp
             }
         }
 
+        public bool MemoryScanMode
+        {
+            get => Config.MemoryScanMode;
+            set
+            {
+                Config.MemoryScanMode = value;
+                notifyPropertyChanged();
+            }
+        }
+
         public Uri ShowingUri
         {
             get

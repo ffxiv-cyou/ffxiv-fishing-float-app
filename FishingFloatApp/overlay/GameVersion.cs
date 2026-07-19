@@ -12,20 +12,6 @@ namespace FishingFloatApp.Overlay
     {
         public string Name => "otk::game_ver";
 
-        [DllImport("user32.dll", EntryPoint = "FindWindow", CharSet = CharSet.Unicode)]
-        private static extern IntPtr FindWindow(string sClass, string sWindow);
-
-        [DllImport("user32.dll", EntryPoint = "FindWindowEx", CharSet = CharSet.Unicode)]
-        private static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr childAfter, string className, string windowTitle);
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle, uint dwProcessId);
-
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        static extern bool QueryFullProcessImageName(IntPtr hProcess, uint dwFlags, [Out] StringBuilder lpExeName, ref int lpdwSize);
-
-        const uint PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
 
         public GameVersion()
         {
@@ -40,21 +26,21 @@ namespace FishingFloatApp.Overlay
         {
             JsonElement fallback = JsonSerializer.SerializeToElement(new { });
 
-            IntPtr hWindow = FindWindow(null, "最终幻想XIV");
+            IntPtr hWindow = SystemAPI.FindWindow(null, "最终幻想XIV");
             if (hWindow == IntPtr.Zero)
                 return fallback;
 
-            _ = GetWindowThreadProcessId(hWindow, out uint processId);
+            _ = SystemAPI.GetWindowThreadProcessId(hWindow, out uint processId);
             if (processId == 0)
                 return fallback;
 
-            var process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, processId);
+            var process = SystemAPI.OpenProcess(SystemAPI.PROCESS_QUERY_LIMITED_INFORMATION, false, processId);
             if (process == IntPtr.Zero)
                 return fallback;
 
             int size = 1024;
             StringBuilder sb = new StringBuilder(size);
-            if (!QueryFullProcessImageName(process, 0, sb, ref size))
+            if (!SystemAPI.QueryFullProcessImageName(process, 0, sb, ref size))
                 return fallback;
 
             var gameDir = System.IO.Path.GetDirectoryName(sb.ToString());

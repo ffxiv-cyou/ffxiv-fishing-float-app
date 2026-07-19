@@ -18,8 +18,8 @@ namespace FishingFloatApp
             base.OnStartup(e);
 #if DEBUG
             ConsoleHelper.AllocConsole();
-            Trace.Listeners.Add(new ConsoleTraceListener());
 #endif
+            Trace.Listeners.Add(new ConsoleTraceListener());
 
             var logFactory = LoggerFactory.Create((v) =>
             {
@@ -33,6 +33,15 @@ namespace FishingFloatApp
             // allow auto play audio
             Environment.SetEnvironmentVariable("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", "--autoplay-policy=no-user-gesture-required");
 
+            FisherDesktop main = new FisherDesktop(log);
+            bool success = main.Init();
+
+            if (!success)
+            {
+                Shutdown(1);
+                return;
+            }
+
             globalMutex = new Mutex(false, "FisherDesktop", out bool mutexWasCreated);
             if (!mutexWasCreated)
             {
@@ -41,8 +50,6 @@ namespace FishingFloatApp
                 return;
             }
 
-            FisherDesktop main = new FisherDesktop(log);
-            main.Init();
             Action start = () =>
             {
                 main.Start();
@@ -61,7 +68,7 @@ namespace FishingFloatApp
             if (main.Config.FirstRun || depenceniesMissing)
             {
                 Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
-                WelcomeWindow welcome = new WelcomeWindow();
+                WelcomeWindow welcome = new WelcomeWindow(main.Config);
                 welcome.ShowDialog();
             }
             start();

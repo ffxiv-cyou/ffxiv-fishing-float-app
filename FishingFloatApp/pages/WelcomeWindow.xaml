@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:FishingFloatApp"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="欢迎" Height="330" Width="420">
+        Title="欢迎" Height="350" Width="420">
     <Window.Resources>
         <Style TargetType="Button" x:Key="Link">
             <Setter Property="Background" Value="Transparent"/>
@@ -63,10 +63,11 @@
                 <TextBlock TextWrapping="Wrap" Margin="5">1. 程序未使用注入方式，需要先启动程序再从大厅进入游戏。</TextBlock>
                 <TextBlock TextWrapping="Wrap" Margin="5">2. 网络波动可能会导致数据解析失败，此时需要小退游戏重新进入。</TextBlock>
                 <StackPanel Orientation="Horizontal">
-                    <Label>3. 若您不介意使用ACT，建议使用我们的悬浮窗版本：</Label>
+                    <Label>3. 若您不介意使用ACT，可以使用我们的悬浮窗版本：</Label>
                     <Button Name="OverlayLink" Style="{StaticResource Link}" Click="openOverlayUrl" Content="链接"/>
                 </StackPanel>
-                <Label>5. 初次使用请调整悬浮窗位置后，右键点击锁定才能开始使用。</Label>
+                <Label>4. 初次启动请先调整悬浮窗位置，右键点击锁定才能开始使用。</Label>
+                <Label>5. 启用内存读取后，可以在游戏中途启动程序，网络波动也会自动恢复</Label>
             </StackPanel>
         </StackPanel>
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" >

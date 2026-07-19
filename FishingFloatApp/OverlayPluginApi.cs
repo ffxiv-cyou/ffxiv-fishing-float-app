@@ -81,6 +81,7 @@ namespace FishingFloatApp
                 return;
             }
 
+            log.LogDebug("respsonse call {callbackId} with data: {data}", callbackId, jsonObject?.ToString());
             invoker?.Invoke(() =>
             {
                 webview.ExecuteScriptAsync($"window.OverlayPluginApi.__callback('{callbackId}', {jsonObject?.ToString() ?? "undefined"});");
