@@ -13,6 +13,9 @@ namespace FishingFloatApp.memory
 
         public void Init()
         {
+            if (sigScanner == null || !sigScanner.Opened)
+                return;
+
             SearchNetworkingModule();
         }
 

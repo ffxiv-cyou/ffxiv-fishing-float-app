@@ -17,7 +17,16 @@ namespace FishingFloatApp
         public string WebViewUserDataFolder => Path.Combine(UserFolder, "WebView2Data");
 
         [JsonIgnore]
-        public string UserFolder { get; } = "";
+        public static string UserFolder
+        {
+            get
+            {
+                return Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "FishingFloatApp"
+                );
+            }
+        }
 
         [JsonIgnore]
         ILogger Logger { get; }
@@ -33,10 +42,6 @@ namespace FishingFloatApp
         public Config(ILogger logger)
         {
             this.Logger = logger;
-            this.UserFolder = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "FishingFloatApp"
-            );
         }
 
         public static string GetWebview2Version()

@@ -37,6 +37,8 @@ namespace FishingFloatApp
             repo = new EventRepo(log);
             Api = new OverlayPluginApi(log, "FisherDesktop");
             Config = new Config(log);
+            SigScanner = new SigScanner();
+            Memory = new MemoryScanner(SigScanner);
 
             Api.CallHandler = repo.handleCallSync;
             repo.Init(Api);
@@ -102,7 +104,7 @@ namespace FishingFloatApp
                     return false;
                 }
 
-                TryCreateMemoryScanner();
+                UpdateMemoryScanner();
             }
 
             initOverlayHandler();
@@ -111,24 +113,19 @@ namespace FishingFloatApp
             return true;
         }
 
-        void TryCreateMemoryScanner()
+        void UpdateMemoryScanner()
         {
             var processes = SigScanner.GetFFXIVProcesses();
-            if (processes.Length == 0)
+            if (processes.Length > 0)
             {
-                Memory = null;
-                SigScanner = null;
-                return;
+                var process = processes[0];
+                SigScanner.Open(process);
+            }
+            else
+            {
+                SigScanner.Close();
             }
 
-            var process = processes[0];
-            if (SigScanner != null && SigScanner.ProcessID == process.Id)
-            {
-                return;
-            }
-
-            SigScanner = new SigScanner(process);
-            Memory = new MemoryScanner(SigScanner);
             Memory.Init();
         }
 
@@ -145,7 +142,7 @@ namespace FishingFloatApp
             if (conn.RemotePort >= 54992 && conn.RemotePort <= 54994)
                 return;
 
-            TryCreateMemoryScanner();
+            UpdateMemoryScanner();
 
             if (Memory == null)
                 return;

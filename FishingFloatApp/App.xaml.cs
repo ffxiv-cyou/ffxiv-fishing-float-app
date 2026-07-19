@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Karambolo.Extensions.Logging.File;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Windows;
 
@@ -19,15 +21,25 @@ namespace FishingFloatApp
 #if DEBUG
             ConsoleHelper.AllocConsole();
 #endif
-            Trace.Listeners.Add(new ConsoleTraceListener());
-
             var logFactory = LoggerFactory.Create((v) =>
             {
                 v.AddConsole();
+                v.AddFile(o =>
+                {
+                    o.BasePath = "./logs";
+                    o.Files = new LogFileOptions[] {
+                        new LogFileOptions()
+                        {
+                            Path = "<counter>.log"
+                        }
+                    };
+                });
                 v.SetMinimumLevel(LogLevel.Debug);
             });
 
-            ILogger log = logFactory.CreateLogger("FisherDesktop");
+            Trace.Listeners.Add(new LoggerTraceListener(logFactory.CreateLogger("Trace")));
+
+            ILogger log = logFactory.CreateLogger("App");
             log.LogInformation("Application starting...");
 
             // allow auto play audio
@@ -74,5 +86,4 @@ namespace FishingFloatApp
             start();
         }
     }
-
 }

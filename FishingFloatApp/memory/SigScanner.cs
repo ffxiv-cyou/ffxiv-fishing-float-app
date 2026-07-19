@@ -1,51 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Net;
 using System.Runtime.InteropServices;
-using System.Windows.Markup;
 
 namespace FishingFloatApp.memory
 {
     internal class SigScanner
     {
         IntPtr ProcessPtr { get; set; }
-        public IntPtr TextBase { get; set; }
-        int TextSize { get; set; }
+        public IntPtr TextBase { get; private set; }
         public int ProcessID { get; private set; }
-
         byte[] TextSectionData { get; set; }
+        int TextSize { get; set; }
 
-        public SigScanner(string windowName)
+        public bool Opened => ProcessPtr != IntPtr.Zero;
+
+        public SigScanner(Process process)
         {
-            IntPtr hWindow = SystemAPI.FindWindow(null, windowName);
-            if (hWindow == IntPtr.Zero)
-                throw new KeyNotFoundException(windowName);
-
-            _ = SystemAPI.GetWindowThreadProcessId(hWindow, out uint processId);
-            if (processId == 0)
-            {
-                var error = Marshal.GetLastWin32Error();
-                throw new Exception($"Failed to get process ID for window '{windowName}'. Error code: {error}");
-            }
-
-            var process = Process.GetProcessById((int)processId);
-            openProcess(process);
+            Open(process);
         }
 
         public SigScanner()
         {
-            var processes = Process.GetProcessesByName("ffxiv_dx11");
-            if (processes.Length == 0)
-                throw new KeyNotFoundException("ffxiv_dx11");
-
-            var process = processes[0];
-            openProcess(process);
-        }
-
-        public SigScanner(Process process)
-        {
-            openProcess(process);
         }
 
         public static Process[] GetFFXIVProcesses()
@@ -53,22 +29,39 @@ namespace FishingFloatApp.memory
             return Process.GetProcessesByName("ffxiv_dx11");
         }
 
-        ~SigScanner()
+        public void Close()
         {
             if (ProcessPtr != IntPtr.Zero)
             {
                 SystemAPI.CloseHandle(ProcessPtr);
                 ProcessPtr = IntPtr.Zero;
             }
+            TextBase = IntPtr.Zero;
+            TextSize = 0;
+            ProcessID = 0;
+            TextSectionData = Array.Empty<byte>();
         }
 
-        void openProcess(Process process)
+        ~SigScanner()
         {
+            Close();
+        }
+
+        public void Open(Process process)
+        {
+            if (ProcessPtr != IntPtr.Zero)
+            {
+                // check if process is the same
+                if (process.Id != ProcessID)
+                {
+                    Close();
+                }
+            }
+
             ProcessID = process.Id;
-
-            ProcessPtr = SystemAPI.OpenProcess(SystemAPI.PROCESS_VM_READ | SystemAPI.PROCESS_QUERY_INFORMATION | SystemAPI.PROCESS_DUP_HANDLE, false, (uint)process.Id);
+            ProcessPtr = SystemAPI.OpenProcess(SystemAPI.PROCESS_VM_READ | SystemAPI.PROCESS_QUERY_INFORMATION, false, (uint)process.Id);
+            
             var module = process.MainModule;
-
             TextBase = module.BaseAddress;
             TextSize = module.ModuleMemorySize;
 
@@ -77,12 +70,18 @@ namespace FishingFloatApp.memory
 
         public int GetBytes(IntPtr address, byte[] buffer)
         {
+            if (ProcessPtr == IntPtr.Zero)
+                return 0;
+
             SystemAPI.ReadProcessMemory(ProcessPtr, address, buffer, buffer.Length, out var size);
             return size.ToInt32();
         }
 
         byte[] ReadMemory(IntPtr address, int length)
         {
+            if (ProcessPtr == IntPtr.Zero)
+                return Array.Empty<byte>();
+
             var buffer = new byte[length];
             SystemAPI.ReadProcessMemory(ProcessPtr, address, buffer, length, out var size);
 
@@ -122,6 +121,9 @@ namespace FishingFloatApp.memory
 
         public T Get<T>(IntPtr address, int offset = 0) where T : struct
         {
+            if (ProcessPtr == IntPtr.Zero)
+                return default(T);
+
             var len = Marshal.SizeOf(typeof(T));
             var buffer = new byte[len];
             SystemAPI.ReadProcessMemory(ProcessPtr, IntPtr.Add(address, offset), buffer, len, out _);
@@ -278,6 +280,9 @@ namespace FishingFloatApp.memory
         /// <returns></returns>
         public SigResult FindSignature(string sig, int offset = 0)
         {
+            if (ProcessPtr == IntPtr.Zero)
+                return new SigResult();
+
             var sigBytes = new SigBytes(sig);
             for (int i = offset; i < TextSize - sigBytes.Bytes.Length; i++)
             {
@@ -306,6 +311,9 @@ namespace FishingFloatApp.memory
 
         public IntPtr ScanBytes(byte[] data, IntPtr start, int size)
         {
+            if (ProcessPtr == IntPtr.Zero)
+                return IntPtr.Zero;
+
             const int ChunkSize = 16 * 1024 * 1024;
             var buf = new byte[ChunkSize];
 
@@ -353,6 +361,9 @@ namespace FishingFloatApp.memory
 
         public IntPtr FindInMemory(byte[] data)
         {
+            if (ProcessPtr == IntPtr.Zero)
+                return IntPtr.Zero;
+
             IntPtr addr = IntPtr.Zero;
             long maxAddress = long.MaxValue;
 
@@ -374,10 +385,6 @@ namespace FishingFloatApp.memory
 
             return IntPtr.Zero;
         }
-
-        #endregion
-
-        #region handle
 
         #endregion
     }
