@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Threading;
 using System.Windows;
 
@@ -45,11 +44,12 @@ namespace FishingFloatApp
             // allow auto play audio
             Environment.SetEnvironmentVariable("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", "--autoplay-policy=no-user-gesture-required");
 
-            FisherDesktop main = new FisherDesktop(log);
+            FisherDesktop main = new FisherDesktop(logFactory);
             bool success = main.Init();
 
             if (!success)
             {
+                log.LogInformation("Restart as UAC");
                 Shutdown(1);
                 return;
             }
@@ -58,6 +58,7 @@ namespace FishingFloatApp
             if (!mutexWasCreated)
             {
                 MessageBox.Show("已经启动了一个实例，请查看右下角通知栏", "没有更多效果了……");
+                log.LogInformation("Instance duplicated exit");
                 Shutdown(1);
                 return;
             }

@@ -1,14 +1,16 @@
-﻿using System;
-using System.Diagnostics;
+﻿using Microsoft.Extensions.Logging;
+using System;
 
 namespace FishingFloatApp.memory
 {
     class MemoryScanner
     {
+        ILogger Logger { get; }
         SigScanner sigScanner { get; }
-        public MemoryScanner(SigScanner sigScanner)
+        public MemoryScanner(ILogger logger, SigScanner sigScanner)
         {
             this.sigScanner = sigScanner;
+            this.Logger = logger;
         }
 
         public void Init()
@@ -34,7 +36,7 @@ namespace FishingFloatApp.memory
             var pNetworkModuleProxy = sigScanner.GetIntPtr(pFramework, 0x1678);
             NetworkModulePtr = sigScanner.GetIntPtr(pNetworkModuleProxy, 0x8);
 
-            Trace.TraceInformation($"Network Module Ptr: {NetworkModulePtr.ToInt64():X8}");
+            Logger.LogInformation("Network module pointer: {pNetworkModule:X8}, text base: {pText:X8}", NetworkModulePtr.ToInt64(), sigScanner.TextBase.ToInt64());
 
             var pZoneClient = sigScanner.GetIntPtr(NetworkModulePtr, 0xA70);
             var pChatClient = sigScanner.GetIntPtr(NetworkModulePtr, 0xA78);
@@ -124,13 +126,13 @@ namespace FishingFloatApp.memory
             var pTcp = sigScanner.GetIntPtr(pRootState, 0x0);
             var pUdp = sigScanner.GetIntPtr(pRootState, 0x8);
 
-            Trace.TraceInformation($"Network counter {counter}, session ptr: {ptr.ToInt64():X8}, pShared: {pShared.ToInt64():X8}, pTcp {pTcp.ToInt64():X8}, pWindow {pWindow.ToInt64():X8} ");
+            Logger.LogInformation("Network session: {0:X8}, state count: {counter}, pState: {pTcp:X8}, pShared: {pShared:X8}, pWindow: {pWindow:X8}", ptr.ToInt64(), counter, pTcp.ToInt64(), pShared.ToInt64(),  pWindow.ToInt64());
 
             var pWindowStart = sigScanner.GetIntPtr(pShared, 0);
             var pWindowEnd = sigScanner.GetIntPtr(pShared, 8);
 
             if (pWindowStart != pWindow || pWindow + 0x100000 != pWindowEnd)
-                Trace.TraceWarning($"shared first 16 byte not match. {pWindowStart.ToInt64():X8} {pWindowEnd.ToInt64():X8} {pWindow.ToInt64():X8}");
+                Logger.LogWarning("Oodle shared data first 16 bytes not match. {pWindow:X8}, {pWindowStart:X8}, {pWindowEnd:X8}", pWindow, pWindowStart, pWindowEnd);
 
             sigScanner.GetBytes(pShared, result.Shared);
             sigScanner.GetBytes(pWindow, result.Window);

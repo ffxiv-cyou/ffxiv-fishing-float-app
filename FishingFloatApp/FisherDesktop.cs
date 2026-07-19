@@ -7,14 +7,11 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Reflection;
 using System.Security.Principal;
-using System.Windows;
 
 namespace FishingFloatApp
 {
     class FisherDesktop
     {
-        private readonly ILogger log;
-
         public OverlayPluginApi Api { get; }
 
         public Config Config { get; }
@@ -29,16 +26,18 @@ namespace FishingFloatApp
 
         SigScanner SigScanner { get; set; }
 
+        ILogger MemoryLogger { get; }
 
-        public FisherDesktop(ILogger logger)
+        public FisherDesktop(ILoggerFactory logger)
         {
-            this.log = logger;
+            var overlayLogger = logger.CreateLogger("Overlay");
+            MemoryLogger = logger.CreateLogger("Memory");
 
-            repo = new EventRepo(log);
-            Api = new OverlayPluginApi(log, "FisherDesktop");
-            Config = new Config(log);
+            repo = new EventRepo(overlayLogger);
+            Api = new OverlayPluginApi(overlayLogger, "FisherDesktop");
+            Config = new Config(logger.CreateLogger("Config"));
             SigScanner = new SigScanner();
-            Memory = new MemoryScanner(SigScanner);
+            Memory = new MemoryScanner(MemoryLogger, SigScanner);
 
             Api.CallHandler = repo.handleCallSync;
             repo.Init(Api);
@@ -166,7 +165,7 @@ namespace FishingFloatApp
             var state = isChatChannel ? Memory.GetChatState(OodleTcpSize) : Memory.GetZoneState(OodleTcpSize);
             if (state == null)
             {
-                Trace.TraceWarning($"Failed to get oodle state from memory");
+                MemoryLogger.LogWarning($"Failed to get oodle state from memory");
                 return;
             }
 
@@ -174,8 +173,7 @@ namespace FishingFloatApp
             monitor.SetOodleState(conn, false, state.Value.Rx.State, state.Value.Rx.Shared, state.Value.Rx.Window);
 
             var chName = isChatChannel ? "Chat" : "Zone";
-
-            Trace.TraceInformation($"{chName} {conn} state reset.");
+            MemoryLogger.LogInformation("Oodle state for {channel}({connection}) is resynced", chName, conn);
         }
 
         public void Start()
