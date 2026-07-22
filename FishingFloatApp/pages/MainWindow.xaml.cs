@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using FishingFloatApp.Overlay;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Core.DevToolsProtocolExtension;
@@ -219,6 +220,11 @@ namespace FishingFloatApp
         void CallFishingFloatMethod(string name)
         {
             webview.ExecuteScriptAsync($@"window.FishingFloat.{name}()");
+        }
+
+        private void ClickHelp(object sender, RoutedEventArgs e)
+        {
+            OpenBrowserWorker.OpenUrl("https://fisher.ffxiv.cyou/web/");
         }
     }
 
