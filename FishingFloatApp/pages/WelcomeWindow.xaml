@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FishingFloatApp"
         mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=local:WelcomeWindowViewModel}"
         WindowStartupLocation="CenterScreen"
         Title="欢迎" Height="350" Width="420">
     <Window.Resources>
@@ -56,18 +57,21 @@
             </StackPanel>
             <Label Margin="110,0,0,0" Padding="0" FontSize="11" Foreground="Gray">1.81 及更新版本在 Win11 下可能无法正常工作，</Label>
             <Label Margin="110,0,0,0" Padding="0" FontSize="11" Foreground="Gray">若遇到无法识别的问题可尝试降级到 1.80 版本。</Label>
+            <CheckBox Margin="110, 10, 0, 0" IsChecked="{Binding Mode=TwoWay, Path=MemoryScanMode}">启用内存读取功能（实验性）</CheckBox>
         </StackPanel>
         <StackPanel Grid.Row="1">
             <Label Style="{StaticResource Title}">使用提醒</Label>
             <StackPanel Margin="10, 0, 0, 0">
-                <TextBlock TextWrapping="Wrap" Margin="5">1. 程序未使用注入方式，需要先启动程序再从大厅进入游戏。</TextBlock>
-                <TextBlock TextWrapping="Wrap" Margin="5">2. 网络波动可能会导致数据解析失败，此时需要小退游戏重新进入。</TextBlock>
                 <StackPanel Orientation="Horizontal">
-                    <Label>3. 若您不介意使用ACT，可以使用我们的悬浮窗版本：</Label>
+                    <Label>1. 若您不介意使用ACT，可以使用我们的悬浮窗版本：</Label>
                     <Button Name="OverlayLink" Style="{StaticResource Link}" Click="openOverlayUrl" Content="链接"/>
                 </StackPanel>
-                <Label>4. 初次启动请先调整悬浮窗位置，右键点击锁定才能开始使用。</Label>
-                <Label>5. 启用内存读取后，可以在游戏中途启动程序，网络波动也会自动恢复</Label>
+                <Label>2. 初次启动请先调整悬浮窗位置，右键点击锁定才能开始使用；</Label>
+                <Label Visibility="{Binding PcapHint}">3. 程序未使用注入方式，需要先启动程序再从大厅进入游戏；</Label>
+                <Label Visibility="{Binding PcapHint}">4. 网络波动可能会导致数据解析失败，此时需要小退游戏重新进入；</Label>
+
+                <Label Visibility="{Binding MemoryHint}">3. 启用内存读取后（非注入），可以在游戏中途启动软件；</Label>
+                <Label Visibility="{Binding MemoryHint}">4. 当前内存读取还属于实验性功能，若遇到问题请反馈。</Label>
             </StackPanel>
         </StackPanel>
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" >

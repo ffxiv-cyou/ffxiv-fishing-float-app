@@ -4,6 +4,8 @@ using FishingFloatApp.pages;
 using Machina.FFXIV;
 using Machina.Infrastructure;
 using Microsoft.Extensions.Logging;
+using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
 using System.Security.Principal;
@@ -77,7 +79,7 @@ namespace FishingFloatApp
             return principal.IsInRole(WindowsBuiltInRole.Administrator);
         }
 
-        void restartCurrent()
+        bool RestartAsUAC()
         {
             var current = Process.GetCurrentProcess();
             var process = new Process();
@@ -86,24 +88,39 @@ namespace FishingFloatApp
                 Verb = "runas",
                 FileName = current.MainModule.FileName,
             };
-            process.Start();
+            try
+            {
+                process.Start();
+                return true;
+            }
+            catch (Win32Exception)
+            {
+                return false;
+            }
+        }
+
+        public void InitConfig()
+        {
+            Config.EnsureFolder();
+            Config.Load();
         }
 
         public bool Init()
         {
-            Config.EnsureFolder();
-            Config.Load();
-
-            if (Config.MemoryScanMode)
+            if (Config.MemoryScanMode == true)
             {
                 if (!isUAC())
                 {
                     // 请求UAC重启当前exe
-                    restartCurrent();
-                    return false;
+                    if (RestartAsUAC())
+                    {
+                        return false;
+                    }
                 }
 
-                UpdateMemoryScanner();
+                // 有可能用户就是不用UAC启动，此时就 fallback 到原有的非内存读取
+                if (isUAC())
+                    UpdateMemoryScanner();
             }
 
             initOverlayHandler();

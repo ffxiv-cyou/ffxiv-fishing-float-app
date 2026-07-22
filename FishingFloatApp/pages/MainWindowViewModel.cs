@@ -37,7 +37,7 @@ namespace FishingFloatApp
 
         public bool MemoryScanMode
         {
-            get => Config.MemoryScanMode;
+            get => Config.MemoryScanMode ?? false;
             set
             {
                 Config.MemoryScanMode = value;

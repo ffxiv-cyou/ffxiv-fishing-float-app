@@ -45,9 +45,22 @@ namespace FishingFloatApp
             Environment.SetEnvironmentVariable("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", "--autoplay-policy=no-user-gesture-required");
 
             FisherDesktop main = new FisherDesktop(logFactory);
-            bool success = main.Init();
+            main.InitConfig();
 
-            if (!success)
+            bool depenceniesMissing = false;
+            if (Config.GetWebview2Version() == null)
+                depenceniesMissing = true;
+            if (Config.GetPcapVersion() == null)
+                depenceniesMissing = true;
+
+            if (main.Config.FirstRun || depenceniesMissing)
+            {
+                Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+                WelcomeWindow welcome = new WelcomeWindow(main.Config);
+                welcome.ShowDialog();
+            }
+
+            if (!main.Init())
             {
                 log.LogInformation("Restart as UAC");
                 Shutdown(1);
@@ -63,28 +76,11 @@ namespace FishingFloatApp
                 return;
             }
 
-            Action start = () =>
-            {
-                main.Start();
+            main.Start();
 
-                Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
-                MainWindow mw = new MainWindow(log, main.Config, main.Api);
-                mw.Show();
-            };
-
-            bool depenceniesMissing = false;
-            if (Config.GetWebview2Version() == null)
-                depenceniesMissing = true;
-            if (Config.GetPcapVersion() == null)
-                depenceniesMissing = true;
-
-            if (main.Config.FirstRun || depenceniesMissing)
-            {
-                Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
-                WelcomeWindow welcome = new WelcomeWindow(main.Config);
-                welcome.ShowDialog();
-            }
-            start();
+            Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
+            MainWindow mw = new MainWindow(log, main.Config, main.Api);
+            mw.Show();
         }
     }
 }

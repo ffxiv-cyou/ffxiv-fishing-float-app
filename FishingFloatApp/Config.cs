@@ -32,7 +32,10 @@ namespace FishingFloatApp
         ILogger Logger { get; }
 
         [JsonIgnore]
-        public bool FirstRun { get; set; } = true;
+        public bool FirstRun => firstRun || MemoryScanMode == null;
+
+        [JsonIgnore]
+        bool firstRun { get; set; } = true;
 
         public Config()
         {
@@ -90,7 +93,7 @@ namespace FishingFloatApp
 
         public bool Debug { get; set; } = false;
 
-        public bool MemoryScanMode { get; set; } = true;
+        public bool? MemoryScanMode { get; set; } = null;
 
         public void Save()
         {
@@ -131,7 +134,7 @@ namespace FishingFloatApp
                     if (obj != null)
                     {
                         Clone(obj);
-                        FirstRun = false;
+                        firstRun = false;
                     }
                 }
             }
@@ -149,6 +152,7 @@ namespace FishingFloatApp
             this.Top = config.Top;
             this.BaseURL = config.BaseURL;
             this.Debug = config.Debug;
+            this.MemoryScanMode = config.MemoryScanMode;
         }
     }
 }

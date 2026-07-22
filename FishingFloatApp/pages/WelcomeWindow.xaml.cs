@@ -8,12 +8,15 @@ namespace FishingFloatApp
     /// </summary>
     public partial class WelcomeWindow : Window
     {
-        Config Config { get; set; }
+        WelcomeWindowViewModel vm { get; }
         public WelcomeWindow(Config config)
         {
-            Config = config;
+            vm = new WelcomeWindowViewModel(config);
 
             InitializeComponent();
+
+            DataContext = vm;
+            
             runCheckes(this, new RoutedEventArgs());
         }
 

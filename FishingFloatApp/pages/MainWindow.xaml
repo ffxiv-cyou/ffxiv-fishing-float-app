@@ -35,7 +35,7 @@
             <Separator />
             <MenuItem Header="刷新" Click="ClickRefresh" />
             <MenuItem Header="窗口锁定/穿透" IsCheckable="True" IsChecked="{Binding Transparent}" />
-            <MenuItem Header="内存读取" IsCheckable="True" IsChecked="{Binding MemoryScanMode}" />
+            <MenuItem Header="启用内存读取" IsCheckable="True" IsChecked="{Binding MemoryScanMode}" />
             <MenuItem Header="退出" Click="ClickExit" />
         </ContextMenu>
         <ContextMenu x:Key="webview_menu">
@@ -43,7 +43,7 @@
         </ContextMenu>
     </Window.Resources>
     <Grid>
-        <tb:TaskbarIcon ToolTipText="杆时悬浮窗" ContextMenu="{StaticResource ResourceKey=menu}" IconSource="/icon.ico">
+        <tb:TaskbarIcon ToolTipText="鱼漂桌面版" ContextMenu="{StaticResource ResourceKey=menu}" IconSource="/icon.ico">
         </tb:TaskbarIcon>
         <Wpf:WebView2 Margin="4, 4, 4, 4" x:Name="webview" Source="{Binding ShowingUri}" DefaultBackgroundColor="Transparent"/>
     </Grid>
